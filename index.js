@@ -3,6 +3,7 @@ const mysql = require('mysql');
 const chalk = require('chalk');
 require('console.table')
 
+
 const connection = mysql.createConnection({
     host: 'localhost',
     port: 3306,
@@ -12,17 +13,63 @@ const connection = mysql.createConnection({
 });
 
 
-// promptMainMenu, Selections
+// INQ: Main Menu
 const promptUserMainMenu = () => {
     return inquirer.prompt([
         {
             type: 'list',
-            choices: ["View all employees", "View all roles", "View all departments", "Finish"],
+            choices: ["View all employees", "View all roles", "View all departments", "Add employee", "Finish"],
             message: 'Please make a selection:',
             name: 'selection',
         },
     ]);
 }
+
+// INQ: Add Employee
+const addEmployee = () => {
+    connection.query("SELECT title, first_name, last_name FROM roles INNER JOIN employees ", (err, data) => {
+        if (err) throw err;
+
+        inquirer.prompt([
+            {
+                type: 'input',
+                message: 'Employee\'s first name?',
+                name: 'firstName',
+            },
+            {
+                type: 'input',
+                message: 'Employee\'s last name?',
+                name: 'lastName',
+            },
+            {
+                type: 'rawlist',
+                message: 'Employee\'s role?',
+                choices() {
+                    let choiceArray = data.map((element) => {
+                        return element.title;
+                    });
+                    return [...new Set(choiceArray)]
+                },
+                name: 'choiceRole',
+            },
+            {
+                type: 'rawlist',
+                message: 'Employee\'s manager?',
+                choices() {
+                    const choiceArray = [];
+                    return data.map((element) => {
+                        return element.first_name + " " + element.last_name;
+                    });
+                },
+                name: 'choiceManager',
+            },
+        ]);
+    })
+
+
+}
+
+
 
 
 // Main Menu
@@ -40,6 +87,9 @@ function promptMainMenu() {
                     break;
                 case "View all departments":
                     viewDepartments();
+                    break;
+                case "Add employee":
+                    addEmployee();
                     break;
                 case "Finish":
                     finish();
@@ -69,7 +119,6 @@ function viewDepartments() {
         promptMainMenu();
     })
 }
-
 function viewRoles() {
     connection.query("select * from roles", (err, data) => {
         if (err) throw err;
@@ -77,7 +126,6 @@ function viewRoles() {
         promptMainMenu();
     })
 }
-
 function viewEmployees() {
     connection.query("select * from employees", (err, data) => {
         if (err) throw err;
@@ -98,7 +146,6 @@ connection.connect((err) => {
     // Run init() function
     init();
 });
-
 
 
 
