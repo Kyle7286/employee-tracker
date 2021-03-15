@@ -17,12 +17,61 @@ const connection = mysql.createConnection({
 const promptUserMainMenu = () => {
     return inquirer.prompt([
         {
-            type: 'list',
-            choices: ["View all employees", "View all roles", "View all departments", "Add employee", "Add department", "Add roles", "Finish"],
+            type: 'rawlist',
+            choices: ["View all employees", "View all roles", "View all departments", "Add employee", "Add department", "Add role", "Finish"],
             message: 'Please make a selection:',
             name: 'selection',
         },
     ]);
+}
+
+// INQ: Add Role
+const addRole = () => {
+    connection.query("SELECT roles.id, roles.title, roles.salary, roles.department_id, departments.name FROM roles INNER JOIN departments ON roles.department_id = departments.id", (err, data) => {
+        if (err) throw err;
+        inquirer.prompt([
+            {
+                type: 'input',
+                message: 'Roles\'s title?',
+                name: 'inputTitle',
+            },
+            {
+                type: 'input',
+                message: 'Salary?',
+                name: 'inputSalary',
+            },
+            {
+                type: 'rawlist',
+                message: 'Which department?',
+                choices() {
+                    let choiceArray = data.map((element) => {
+                        return element.name;
+                    });
+                    return [...new Set(choiceArray)]
+                },
+                name: 'choiceDepartment',
+            },
+        ]).then((input) => {
+            // Get roleid of the selected title
+            let departmentID = (data.filter(element => element.name === input.choiceDepartment))[0].department_id;
+            console.log(departmentID);
+
+            // Insert role into DB
+            connection.query(
+                'INSERT INTO roles SET ?',
+                {
+                    title: input.inputTitle,
+                    salary: input.inputSalary,
+                    department_id: departmentID,
+                },
+                (err, res) => {
+                    if (err) throw err;
+                    console.log(`Role ` + chalk.bold.green(`${input.inputTitle}`) + ` successfully added into the system!`);
+                    promptMainMenu();
+                }
+            );
+        });
+    });
 }
 
 // INQ: Add Department
@@ -43,20 +92,17 @@ const addDepartment = () => {
                 },
                 (err, res) => {
                     if (err) throw err;
-                    console.log(`Department ${input.departmentName} successfully added into the system!`);
+                    console.log(`Department ` + chalk.bold.green(`${input.departmentName}`) + ` successfully added into the system!`);
                     promptMainMenu();
                 }
             );
         });
 };
 
-
-
 // INQ: Add Employee
 const addEmployee = () => {
     connection.query("SELECT employees.id, employees.first_name, employees.last_name, employees.manager_id, employees.role_id, roles.title FROM employees INNER JOIN roles ON employees.role_id = roles.id;", (err, data) => {
         if (err) throw err;
-
         inquirer.prompt([
             {
                 type: 'input',
@@ -120,7 +166,6 @@ const addEmployee = () => {
     });
 }
 
-
 // Main Menu
 function promptMainMenu() {
     promptUserMainMenu()
@@ -143,6 +188,9 @@ function promptMainMenu() {
                 case "Add department":
                     addDepartment();
                     break;
+                case "Add role":
+                    addRole();
+                    break;
                 case "Finish":
                     finish();
                     break;
@@ -150,8 +198,6 @@ function promptMainMenu() {
 
         });
 }
-
-
 
 const init = () => {
     console.log(chalk.bold.blue('Employee Management System'));
@@ -185,7 +231,6 @@ function viewEmployees() {
         promptMainMenu();
     })
 }
-
 function finish() {
     connection.end();
     process.exit();
