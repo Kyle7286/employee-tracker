@@ -18,12 +18,39 @@ const promptUserMainMenu = () => {
     return inquirer.prompt([
         {
             type: 'list',
-            choices: ["View all employees", "View all roles", "View all departments", "Add employee", "Finish"],
+            choices: ["View all employees", "View all roles", "View all departments", "Add employee", "Add department", "Add roles", "Finish"],
             message: 'Please make a selection:',
             name: 'selection',
         },
     ]);
 }
+
+// INQ: Add Department
+const addDepartment = () => {
+    inquirer
+        .prompt([
+            {
+                type: 'input',
+                message: 'Department\'s name?',
+                name: 'departmentName',
+            },
+        ]).then((input) => {
+            // Insert employee into DB
+            connection.query(
+                'INSERT INTO departments SET ?',
+                {
+                    name: input.departmentName,
+                },
+                (err, res) => {
+                    if (err) throw err;
+                    console.log(`Department ${input.departmentName} successfully added into the system!`);
+                    promptMainMenu();
+                }
+            );
+        });
+};
+
+
 
 // INQ: Add Employee
 const addEmployee = () => {
@@ -85,19 +112,13 @@ const addEmployee = () => {
                 },
                 (err, res) => {
                     if (err) throw err;
-                    console.log(`Employee ${input.firstName}` + ` ` + `${input.lastName} successfully added into the system!`);
+                    console.log(`Employee ` + chalk.bold.green(`${input.firstName} ${input.lastName}`) + ` successfully added into the system!`);
                     promptMainMenu();
                 }
             );
-
-
-        })
-    })
-
-
+        });
+    });
 }
-
-
 
 
 // Main Menu
@@ -119,6 +140,9 @@ function promptMainMenu() {
                 case "Add employee":
                     addEmployee();
                     break;
+                case "Add department":
+                    addDepartment();
+                    break;
                 case "Finish":
                     finish();
                     break;
@@ -134,9 +158,9 @@ const init = () => {
     console.log(`
     Hello!
 
-            `+ chalk.underline('Thank you') + ` SO much for using ` + chalk.bold.blue('Employee Management System') + `! Hope you find it to be very useful.
-    Please begin by entering the Team's name! :)
-        `);
+                            `+ chalk.underline('Thank you') + ` SO much for using` + chalk.bold.blue('Employee Management System') + `! Hope you find it to be very useful.
+                    Please begin by entering the Team's name! :)
+                        `);
     promptMainMenu();
 }
 
@@ -170,7 +194,7 @@ function finish() {
 // Run script on call
 connection.connect((err) => {
     if (err) throw err;
-    console.log(`connected as id ${connection.threadId}`);
+    console.log(`connected as id ${connection.threadId} `);
     // Run init() function
     init();
 });
