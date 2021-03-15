@@ -27,7 +27,7 @@ const promptUserMainMenu = () => {
 
 // INQ: Add Employee
 const addEmployee = () => {
-    connection.query("SELECT title, first_name, last_name FROM roles INNER JOIN employees ", (err, data) => {
+    connection.query("SELECT employees.id, employees.first_name, employees.last_name, employees.manager_id, employees.role_id, roles.title FROM employees INNER JOIN roles ON employees.role_id = roles.id;", (err, data) => {
         if (err) throw err;
 
         inquirer.prompt([
@@ -48,6 +48,7 @@ const addEmployee = () => {
                     let choiceArray = data.map((element) => {
                         return element.title;
                     });
+                    choiceArray.push("None");
                     return [...new Set(choiceArray)]
                 },
                 name: 'choiceRole',
@@ -56,14 +57,33 @@ const addEmployee = () => {
                 type: 'rawlist',
                 message: 'Employee\'s manager?',
                 choices() {
-                    const choiceArray = [];
                     return data.map((element) => {
                         return element.first_name + " " + element.last_name;
                     });
                 },
                 name: 'choiceManager',
             },
-        ]);
+        ]).then((input) => {
+            console.log(`choiceRole: ${input.choiceRole}`);
+            console.log(`choiceManager: ${input.choiceManager}`);
+
+            // Get roleid of the selected title
+            let roleid;
+            if (input.choiceRole != "None") {
+                roleid = (data.filter(element => element.title === input.choiceRole))[0].role_id;
+            } else { roleid = null }
+
+            // Get Manager ID of selected Manager
+            let managerid;
+            console.log(data.filter(element => element.first_name + " " + element.last_name === input.choiceManager));
+            managerid = (data.filter(element => element.first_name + " " + element.last_name === input.choiceManager))[0].id;
+            console.log(managerid);
+
+            // Insert employee
+            connection.query("INSERT INTO employees SET ?")
+
+
+        })
     })
 
 

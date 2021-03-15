@@ -1,33 +1,40 @@
-const mysql = require('mysql');
-const connection = mysql.createConnection({
-    host: 'localhost',
-    port: 3306,
-    user: 'root',
-    password: 'root',
-    database: 'employeetracker_db',
-});
+let array = [
+    {
+        id: 6,
+        title: 'Lead Engineer',
+        salary: 120000,
+        department_id: 2,
+        first_name: 'Kevin',
+        last_name: 'Spacey',
+        role_id: 6,
+        MANAGER_ID: 4
+    },
+    {
+        id: 5,
+        title: 'Lead Engineer',
+        salary: 120000,
+        department_id: 2,
+        first_name: 'John',
+        last_name: 'Travolta',
+        role_id: 5,
+        MANAGER_ID: null
+    },
+    {
+        id: 4,
+        title: 'Lead Engineer',
+        salary: 120000,
+        department_id: 2,
+        first_name: 'Hank',
+        last_name: 'Hill',
+        role_id: 4,
+        MANAGER_ID: 1
+    }
+]
 
-function getRoles() {
-    connection.query("select title from roles", (err, data) => {
-        if (err) throw err;
+// Get employee ID
+let x = (array.filter(element => element.id === 4))[0].id
 
-        newarray = data.map((element) => {
-            return element.title;
-        })
+// Get role id
+let y = (array.filter(element => element.title === "Lead Engineer"))[0].role_id
 
-        // console.log(newarray);
-        gArray =  newarray;
-    })
-}
-
-
-// Run script on call
-connection.connect((err) => {
-    if (err) throw err;
-    console.log(`connected as id ${connection.threadId}`);
-    // Run init() function
-    let a = getRoles();
-    console.log(a);
-});
-
-
+console.log(y);
