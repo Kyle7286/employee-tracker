@@ -48,7 +48,6 @@ const addEmployee = () => {
                     let choiceArray = data.map((element) => {
                         return element.title;
                     });
-                    choiceArray.push("None");
                     return [...new Set(choiceArray)]
                 },
                 name: 'choiceRole',
@@ -57,25 +56,23 @@ const addEmployee = () => {
                 type: 'rawlist',
                 message: 'Employee\'s manager?',
                 choices() {
-                    return data.map((element) => {
+                    let choiceArray = data.map((element) => {
                         return element.first_name + " " + element.last_name;
                     });
+                    choiceArray.push("None");
+                    return choiceArray;
                 },
                 name: 'choiceManager',
             },
         ]).then((input) => {
-            console.log(`choiceRole: ${input.choiceRole}`);
-            console.log(`choiceManager: ${input.choiceManager}`);
-
             // Get roleid of the selected title
-            let roleid;
-            if (input.choiceRole != "None") {
-                roleid = (data.filter(element => element.title === input.choiceRole))[0].role_id;
-            } else { roleid = null }
+            let roleid = (data.filter(element => element.title === input.choiceRole))[0].role_id;
 
             // Get Manager ID of selected Manager
             let managerid;
-            managerid = (data.filter(element => element.first_name + " " + element.last_name === input.choiceManager))[0].id;
+            if (input.choiceManager != "None") {
+                managerid = (data.filter(element => element.first_name + " " + element.last_name === input.choiceManager))[0].id;
+            } else { managerid = null }
 
             // Insert employee into DB
             connection.query(
@@ -85,7 +82,6 @@ const addEmployee = () => {
                     last_name: input.lastName,
                     manager_id: managerid,
                     role_id: roleid,
-
                 },
                 (err, res) => {
                     if (err) throw err;
