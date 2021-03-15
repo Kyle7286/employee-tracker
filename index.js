@@ -75,12 +75,24 @@ const addEmployee = () => {
 
             // Get Manager ID of selected Manager
             let managerid;
-            console.log(data.filter(element => element.first_name + " " + element.last_name === input.choiceManager));
             managerid = (data.filter(element => element.first_name + " " + element.last_name === input.choiceManager))[0].id;
-            console.log(managerid);
 
-            // Insert employee
-            connection.query("INSERT INTO employees SET ?")
+            // Insert employee into DB
+            connection.query(
+                'INSERT INTO employees SET ?',
+                {
+                    first_name: input.firstName,
+                    last_name: input.lastName,
+                    manager_id: managerid,
+                    role_id: roleid,
+
+                },
+                (err, res) => {
+                    if (err) throw err;
+                    console.log(`Employee ${input.firstName}` + ` ` + `${input.lastName} successfully added into the system!`);
+                    promptMainMenu();
+                }
+            );
 
 
         })
