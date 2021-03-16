@@ -250,6 +250,7 @@ function promptMainMenu() {
 
         });
 }
+// Init function
 const init = () => {
     console.log(chalk.bold.blue('Employee Management System'));
     console.log(`
@@ -281,6 +282,7 @@ function viewEmployees() {
         promptMainMenu();
     })
 }
+// quit/finish function
 function finish() {
     connection.end();
     process.exit();
