@@ -85,7 +85,7 @@ const addRole = () => {
             inquirer.prompt([
                 {
                     type: 'input',
-                    message: 'Roles\'s title?',
+                    message: 'Role\'s title?',
                     name: 'inputTitle',
                 },
                 {
