@@ -216,6 +216,34 @@ const addEmployee = () => {
         });
     });
 }
+
+function viewDepartments() {
+    connection.query("select * from departments", (err, data) => {
+        if (err) throw err;
+        console.table(data);
+        promptMainMenu();
+    })
+}
+function viewRoles() {
+    connection.query("select * from roles", (err, data) => {
+        if (err) throw err;
+        console.table(data);
+        promptMainMenu();
+    })
+}
+function viewEmployees() {
+    connection.query("select * from employees", (err, data) => {
+        if (err) throw err;
+        console.table(data);
+        promptMainMenu();
+    })
+}
+// quit/finish function
+function finish() {
+    connection.end();
+    console.log("\nSystem successfully exited...");
+    process.exit();
+}
 // Main Menu
 function promptMainMenu() {
     promptUserMainMenu()
@@ -252,45 +280,15 @@ function promptMainMenu() {
 }
 // Init function
 const init = () => {
-    console.log(chalk.bold.blue('Employee Management System'));
-    console.log(`
-    Hello!
+    console.log(chalk.bold.blue('Employee Management System\n'));
 
-                            `+ chalk.underline('Thank you') + ` SO much for using ` + chalk.bold.blue('Employee Management System') + `! Hope you find it to be very useful.
-                    Please begin by entering the Team's name! :)
-                        `);
+
     promptMainMenu();
-}
-function viewDepartments() {
-    connection.query("select * from departments", (err, data) => {
-        if (err) throw err;
-        console.table(data);
-        promptMainMenu();
-    })
-}
-function viewRoles() {
-    connection.query("select * from roles", (err, data) => {
-        if (err) throw err;
-        console.table(data);
-        promptMainMenu();
-    })
-}
-function viewEmployees() {
-    connection.query("select * from employees", (err, data) => {
-        if (err) throw err;
-        console.table(data);
-        promptMainMenu();
-    })
-}
-// quit/finish function
-function finish() {
-    connection.end();
-    process.exit();
 }
 // Run script on call
 connection.connect((err) => {
     if (err) throw err;
-    console.log(`connected as id ${connection.threadId} `);
+    console.log(`Successfully connected to the system as id ${connection.threadId}....\n\n\n`);
     // Run init() function
     init();
 });
