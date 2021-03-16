@@ -1,18 +1,17 @@
 const inquirer = require("inquirer");
 const mysql = require('mysql');
 const chalk = require('chalk');
-require('console.table')
+require("dotenv").config();
+require('console.table');
 
-
+// 
 const connection = mysql.createConnection({
-    host: 'localhost',
-    port: 3306,
-    user: 'root',
-    password: 'root',
-    database: 'employeetracker_db',
+    host: process.env.DB_HOST,
+    port: process.env.DB_PORT,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASS,
+    database: process.env.DB_NAME,
 });
-
-
 // INQ: Main Menu
 const promptUserMainMenu = () => {
     return inquirer.prompt([
@@ -24,7 +23,6 @@ const promptUserMainMenu = () => {
         },
     ]);
 }
-
 // INQ: Add Role
 const addRole = () => {
     connection.query("SELECT roles.id, roles.title, roles.salary, roles.department_id, departments.name FROM roles INNER JOIN departments ON roles.department_id = departments.id", (err, data) => {
@@ -73,7 +71,6 @@ const addRole = () => {
         });
     });
 }
-
 // INQ: Add Department
 const addDepartment = () => {
     inquirer
@@ -98,7 +95,6 @@ const addDepartment = () => {
             );
         });
 };
-
 // INQ: Add Employee
 const addEmployee = () => {
     connection.query("SELECT employees.id, employees.first_name, employees.last_name, employees.manager_id, employees.role_id, roles.title FROM employees INNER JOIN roles ON employees.role_id = roles.id;", (err, data) => {
@@ -165,12 +161,10 @@ const addEmployee = () => {
         });
     });
 }
-
 // Main Menu
 function promptMainMenu() {
     promptUserMainMenu()
         .then(response => {
-
             // Run respective function based on selection
             switch (response.selection) {
                 case "View all employees":
@@ -198,7 +192,6 @@ function promptMainMenu() {
 
         });
 }
-
 const init = () => {
     console.log(chalk.bold.blue('Employee Management System'));
     console.log(`
@@ -209,7 +202,6 @@ const init = () => {
                         `);
     promptMainMenu();
 }
-
 function viewDepartments() {
     connection.query("select * from departments", (err, data) => {
         if (err) throw err;
