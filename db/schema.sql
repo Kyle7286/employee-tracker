@@ -15,13 +15,13 @@ drop table if exists employees;
 -- Create tables --
 CREATE TABLE departments (
     id INTEGER AUTO_INCREMENT NOT NULL,
-    name VARCHAR(30) not null,
+    name VARCHAR(45) not null,
     primary key (id)
 );
 
 CREATE TABLE roles (
     id INT AUTO_INCREMENT NOT NULL,
-    title VARCHAR(30) not null,
+    title VARCHAR(45) not null,
     salary DECIMAL not null,
     department_id integer not null,
     primary key (id)
@@ -29,8 +29,8 @@ CREATE TABLE roles (
 
 CREATE TABLE employees (
     id INTEGER AUTO_INCREMENT NOT NULL,
-    first_name VARCHAR(30) not null,
-    last_name VARCHAR(30) not null,
+    first_name VARCHAR(45) not null,
+    last_name VARCHAR(45) not null,
     role_id INTEGER not null,
     MANAGER_ID INTEGER,
     primary key (id)

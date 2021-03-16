@@ -4,7 +4,7 @@ const chalk = require('chalk');
 require("dotenv").config();
 require('console.table');
 
-// 
+// SQL Connection details
 const connection = mysql.createConnection({
     host: process.env.DB_HOST,
     port: process.env.DB_PORT,
@@ -17,11 +17,67 @@ const promptUserMainMenu = () => {
     return inquirer.prompt([
         {
             type: 'rawlist',
-            choices: ["View all employees", "View all roles", "View all departments", "Add employee", "Add department", "Add role", "Finish"],
+            choices: ["View all employees", "View all roles", "View all departments", "Add employee", "Add department", "Add role", "Update role", "Quit"],
             message: 'Please make a selection:',
             name: 'selection',
         },
     ]);
+}
+// INQ: Update Role
+const updateRole = () => {
+    connection.query("SELECT employees.id, employees.first_name, employees.last_name, employees.role_id, roles.title FROM employees INNER JOIN roles ON employees.role_id = roles.id ORDER BY role_id;",
+        (err, data) => {
+            if (err) throw err;
+            inquirer.prompt([
+                {
+                    type: 'rawlist',
+                    message: 'Which employee would you like to update?',
+                    choices() {
+                        return data.map((element) => {
+                            return element.first_name + " " + element.last_name;
+                        });
+                    },
+                    name: 'choiceEmployee',
+                },
+                {
+                    type: 'rawlist',
+                    message: 'Which role would you like to assign?',
+                    choices() {
+                        let choiceArray = data.map((element) => {
+                            return element.title;
+                        });
+                        return [...new Set(choiceArray)]
+                    },
+                    name: 'choiceRole',
+                },
+            ]).then((input) => {
+                // Get roleid of the selected title
+                let roleID = (data.filter(element => element.title === input.choiceRole))[0].role_id;
+                console.log(roleID);
+
+                // Get employee id of the selected employee
+                let employeeID = (data.filter(element => element.first_name + " " + element.last_name === input.choiceEmployee))[0].id;
+                console.log(employeeID);
+
+                // Update role for selected employee
+                connection.query(
+                    'UPDATE employees SET ? WHERE ?',
+                    [
+                        {
+                            role_id: roleID,
+                        },
+                        {
+                            id: employeeID,
+                        },
+                    ],
+                    (err, res) => {
+                        if (err) throw err;
+                        console.log(`Successfully updated the role!`);
+                        promptMainMenu();
+                    }
+                );
+            });
+        });
 }
 // INQ: Add Role
 const addRole = () => {
@@ -185,7 +241,10 @@ function promptMainMenu() {
                 case "Add role":
                     addRole();
                     break;
-                case "Finish":
+                case "Update role":
+                    updateRole();
+                    break;
+                case "Quit":
                     finish();
                     break;
             }
@@ -227,7 +286,6 @@ function finish() {
     connection.end();
     process.exit();
 }
-
 // Run script on call
 connection.connect((err) => {
     if (err) throw err;
