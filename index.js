@@ -53,11 +53,9 @@ const updateRole = () => {
             ]).then((input) => {
                 // Get roleid of the selected title
                 let roleID = (data.filter(element => element.title === input.choiceRole))[0].role_id;
-                console.log(roleID);
 
                 // Get employee id of the selected employee
                 let employeeID = (data.filter(element => element.first_name + " " + element.last_name === input.choiceEmployee))[0].id;
-                console.log(employeeID);
 
                 // Update role for selected employee
                 connection.query(
@@ -257,7 +255,7 @@ const init = () => {
     console.log(`
     Hello!
 
-                            `+ chalk.underline('Thank you') + ` SO much for using` + chalk.bold.blue('Employee Management System') + `! Hope you find it to be very useful.
+                            `+ chalk.underline('Thank you') + ` SO much for using ` + chalk.bold.blue('Employee Management System') + `! Hope you find it to be very useful.
                     Please begin by entering the Team's name! :)
                         `);
     promptMainMenu();
