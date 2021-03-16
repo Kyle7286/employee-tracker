@@ -24,9 +24,11 @@ The purpose of this application is to allow the management of a employee system 
     * DB_USER=
     * DB_PASS=
     * DB_NAME=
-2. run: `node index` or `npm start`
-3. Make a selection on what you want to do
-4. Follow the prompts
+2. Copy/Paste schema.sql into your mySQL Workbench -> run query
+3. Copy/Paste seeds.sql into your mySQL Workbench -> run query
+3. run: `node index` or `npm start`
+5. Make a selection on what you want to do
+6. Follow the prompts
 
 ## Testing
 ---
