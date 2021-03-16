@@ -17,11 +17,87 @@ const promptUserMainMenu = () => {
     return inquirer.prompt([
         {
             type: 'rawlist',
-            choices: ["View all employees", "View all roles", "View all departments", "Add employee", "Add department", "Add role", "Update role", "Quit"],
+            choices: [
+                "View all employees",
+                "View all roles",
+                "View all departments",
+                "Add employee",
+                "Add department",
+                "Add role",
+                "Update role",
+                "Update manager",
+                "Quit"
+            ],
             message: 'Please make a selection:',
             name: 'selection',
         },
     ]);
+}
+// INQ: Update Manager
+const updateManager = () => {
+    connection.query("SELECT * FROM employees;",
+        (err, data) => {
+            if (err) throw err;
+            inquirer.prompt([
+                {
+                    type: 'rawlist',
+                    message: 'Which employee would you like to update?',
+                    choices() {
+                        return data.map((element) => {
+                            return element.first_name + " " + element.last_name;
+                        });
+                    },
+                    name: 'choiceEmployee',
+                },
+            ]).then((input) => {
+                inquirer.prompt([
+                    {
+                        type: 'rawlist',
+                        message: 'Which manager would you like to assign?',
+                        choices() {
+                            // returns an array without the selected employee from the previous prompt as well as a null 
+                            let choiceArray = [];
+                            choiceArray = data.map((element) => {
+                                return element.first_name + " " + element.last_name;
+                            });
+
+                            choiceArray = choiceArray.filter((e) => { return e !== input.choiceEmployee; });
+                            choiceArray.push("null");
+                            return choiceArray;
+                        },
+                        name: 'choiceManager',
+                    },
+                ]).then((input2) => {
+
+                    // Get employee id of the selected employee to update
+                    let employeeID = (data.filter(element => element.first_name + " " + element.last_name === input.choiceEmployee))[0].id;
+
+                    // Get employee id of the selected manager if null was not selected prior
+                    let managerID = null;
+                    if (input2.choiceManager !== "null") {
+                        managerID = (data.filter(element => element.first_name + " " + element.last_name === input2.choiceManager))[0].id;
+                    }
+
+                    // Update role for selected employee
+                    connection.query(
+                        'UPDATE employees SET ? WHERE ?',
+                        [
+                            {
+                                MANAGER_ID: managerID,
+                            },
+                            {
+                                id: employeeID,
+                            },
+                        ],
+                        (err, res) => {
+                            if (err) throw err;
+                            console.log(`Successfully updated the manager!\n`);
+                            promptMainMenu();
+                        }
+                    );
+                })
+            });
+        });
 }
 // INQ: Update Role
 const updateRole = () => {
@@ -70,7 +146,7 @@ const updateRole = () => {
                     ],
                     (err, res) => {
                         if (err) throw err;
-                        console.log(`Successfully updated the role!`);
+                        console.log(`Successfully updated the role!\n`);
                         promptMainMenu();
                     }
                 );
@@ -144,7 +220,7 @@ const addDepartment = () => {
                 },
                 (err, res) => {
                     if (err) throw err;
-                    console.log(`Department ` + chalk.bold.green(`${input.departmentName}`) + ` successfully added into the system!`);
+                    console.log(`Department ` + chalk.bold.green(`${input.departmentName}`) + ` successfully added into the system!\n`);
                     promptMainMenu();
                 }
             );
@@ -209,7 +285,7 @@ const addEmployee = () => {
                 },
                 (err, res) => {
                     if (err) throw err;
-                    console.log(`Employee ` + chalk.bold.green(`${input.firstName} ${input.lastName}`) + ` successfully added into the system!`);
+                    console.log(`Employee ` + chalk.bold.green(`${input.firstName} ${input.lastName}`) + ` successfully added into the system!\n`);
                     promptMainMenu();
                 }
             );
@@ -270,6 +346,9 @@ function promptMainMenu() {
                     break;
                 case "Update role":
                     updateRole();
+                    break;
+                case "Update manager":
+                    updateManager();
                     break;
                 case "Quit":
                     finish();
