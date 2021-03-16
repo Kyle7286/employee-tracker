@@ -81,51 +81,52 @@ const updateRole = () => {
 }
 // INQ: Add Role
 const addRole = () => {
-    connection.query("SELECT roles.id, roles.title, roles.salary, roles.department_id, departments.name FROM roles INNER JOIN departments ON roles.department_id = departments.id", (err, data) => {
-        if (err) throw err;
-        inquirer.prompt([
-            {
-                type: 'input',
-                message: 'Roles\'s title?',
-                name: 'inputTitle',
-            },
-            {
-                type: 'input',
-                message: 'Salary?',
-                name: 'inputSalary',
-            },
-            {
-                type: 'rawlist',
-                message: 'Which department?',
-                choices() {
-                    let choiceArray = data.map((element) => {
-                        return element.name;
-                    });
-                    return [...new Set(choiceArray)]
-                },
-                name: 'choiceDepartment',
-            },
-        ]).then((input) => {
-            // Get roleid of the selected title
-            let departmentID = (data.filter(element => element.name === input.choiceDepartment))[0].department_id;
-            console.log(departmentID);
-
-            // Insert role into DB
-            connection.query(
-                'INSERT INTO roles SET ?',
+    connection.query("SELECT distinct departments.name, departments.id FROM departments;",
+        (err, data) => {
+            if (err) throw err;
+            inquirer.prompt([
                 {
-                    title: input.inputTitle,
-                    salary: input.inputSalary,
-                    department_id: departmentID,
+                    type: 'input',
+                    message: 'Roles\'s title?',
+                    name: 'inputTitle',
                 },
-                (err, res) => {
-                    if (err) throw err;
-                    console.log(`Role ` + chalk.bold.green(`${input.inputTitle}`) + ` successfully added into the system!`);
-                    promptMainMenu();
-                }
-            );
+                {
+                    type: 'input',
+                    message: 'Salary?',
+                    name: 'inputSalary',
+                },
+                {
+                    type: 'rawlist',
+                    message: 'Which department?',
+                    choices() {
+
+                        return data.map((element) => {
+                            return element.name;
+                        });
+
+                    },
+                    name: 'choiceDepartment',
+                },
+            ]).then((input) => {
+                // Get department ID of the selected title
+                let departmentID = (data.filter(element => element.name === input.choiceDepartment))[0].id;
+
+                // Insert role into DB
+                connection.query(
+                    'INSERT INTO roles SET ?',
+                    {
+                        title: input.inputTitle,
+                        salary: input.inputSalary,
+                        department_id: departmentID,
+                    },
+                    (err, res) => {
+                        if (err) throw err;
+                        console.log(`Role ` + chalk.bold.green(`${input.inputTitle}`) + ` successfully added into the system!`);
+                        promptMainMenu();
+                    }
+                );
+            });
         });
-    });
 }
 // INQ: Add Department
 const addDepartment = () => {
